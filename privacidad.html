@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Política de privacidad · Wallet Klub</title>
+<style>
+  :root{color-scheme:light dark; --bg:#ffffff; --ink:#1d2129; --dim:#5b6472; --line:#dde1e7; --accent:#b8860b;}
+  @media (prefers-color-scheme: dark){:root{--bg:#14171c; --ink:#f2ede1; --dim:#9aa3b2; --line:#3a4250; --accent:#e3c463;}}
+  body{margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;}
+  main{max-width:720px; margin:0 auto; padding:28px 20px 60px;}
+  h1{font-size:1.7rem; margin:0 0 4px;}
+  h2{font-size:1.1rem; margin:28px 0 6px; padding-top:14px; border-top:1px solid var(--line); color:var(--accent);}
+  p, li{color:var(--ink);} .dim{color:var(--dim); font-size:.92rem;}
+  code{background:rgba(128,128,128,.15); padding:1px 6px; border-radius:6px; font-size:.9em; word-break:break-all;}
+  a{color:var(--accent);}
+</style>
+</head>
+<body>
+<main>
+  <h1>Política de privacidad</h1>
+  <p class="dim">Wallet Klub · Desarrollador: Xavibc · Última actualización: 02/11/2026</p>
+
+  <p>Wallet Klub es una aplicación web para guardar tarjetas de fidelización (código de barras, QR o número) en tu dispositivo. Esta página explica qué datos maneja y cómo se protegen.</p>
+
+  <h2>Qué datos maneja la aplicación</h2>
+  <ul>
+    <li>Los datos de tus tarjetas: nombre del comercio, número o código, fecha de caducidad, notas, categoría y el diseño elegido (colores, imágenes y logos que tú subes).</li>
+    <li>Si activas la sincronización: la dirección de correo de tu cuenta de Dropbox o de Google, solo para mostrarte con qué cuenta estás conectado.</li>
+  </ul>
+
+  <h2>Dónde se guardan</h2>
+  <ul>
+    <li><b>En tu dispositivo</b>, en el almacenamiento local del navegador o de la aplicación instalada.</li>
+    <li><b>En tu propia nube</b>, solo si activas la sincronización, y a tu elección:
+      <ul>
+        <li><b>Dropbox</b>: en una carpeta privada de la aplicación dentro de «Aplicaciones» de tu Dropbox, a la que solo accede Wallet Klub.</li>
+        <li><b>Google Drive</b>: en una carpeta privada y oculta de la aplicación (<code>appDataFolder</code>) a la que únicamente Wallet Klub tiene acceso.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h2>Qué no hace la aplicación</h2>
+  <ul>
+    <li>No envía tus datos a ningún servidor del desarrollador: no existe tal servidor.</li>
+    <li>El desarrollador no tiene acceso a tus tarjetas ni a tu Dropbox ni a tu Google Drive.</li>
+    <li>No vende ni comparte tus datos con terceros, no muestra publicidad y no usa analítica ni rastreadores.</li>
+  </ul>
+
+  <h2>Permisos que solicita</h2>
+  <p><b>Dropbox.</b> La aplicación usa el acceso «App folder», limitado a su propia carpeta, con los permisos <code>files.content.read</code> y <code>files.content.write</code> (leer y escribir el archivo de copia <code>wallet-klub.json</code>) y <code>account_info.read</code> (mostrar tu correo). No accede a ningún otro archivo de tu Dropbox. Guarda en tu dispositivo un token de renovación para sincronizar sin pedirte permiso cada vez; puedes revocarlo cuando quieras.</p>
+  <p><b>Google Drive.</b> Solo solicita el permiso <code>https://www.googleapis.com/auth/drive.appdata</code>, que permite leer y escribir un único archivo de copia (<code>wallet-klub.json</code>) en la carpeta privada de la aplicación. No accede a ningún otro archivo de tu Drive.</p>
+  <p>El uso que hace Wallet Klub de la información recibida de las API de Google se ajusta a la <a href="https://developers.google.com/terms/api-services-user-data-policy">Política de datos de usuario de los servicios de API de Google</a>, incluidos los requisitos de uso limitado.</p>
+
+  <h2>Cómo controlar o borrar tus datos</h2>
+  <ul>
+    <li>En <b>Ajustes → Sincronizar con Google Drive → Desconectar</b> la aplicación deja de sincronizar y revoca su permiso.</li>
+    <li>Puedes retirar el acceso en cualquier momento: en Dropbox, desde Configuración → Seguridad → Aplicaciones conectadas; en Google, desde <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</li>
+    <li>Para eliminar la copia guardada en la nube: en Dropbox, borra el archivo <code>wallet-klub.json</code> de la carpeta de la aplicación; en Google Drive, <i>Configuración → Administrar aplicaciones → Wallet Klub → Eliminar datos ocultos de la aplicación</i>.</li>
+    <li>Para eliminar los datos del dispositivo, borra los datos del sitio en el navegador o desinstala la aplicación.</li>
+  </ul>
+
+  <h2>Contacto</h2>
+  <p>Si tienes dudas sobre esta política, escribe a: <b>[tu correo de contacto]</b></p>
+</main>
+</body>
+</html>
