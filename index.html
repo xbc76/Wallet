@@ -428,6 +428,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   }
   .sync-box{background:var(--surface-2); border:1px solid var(--stitch); border-radius:14px; padding:12px 14px; margin-bottom:14px;}
   .sync-status{font-family:'Fredoka'; font-weight:600; font-size:1.02rem; margin-bottom:4px;}
+  .copy-row{display:flex; gap:8px; margin-top:6px;}
+  .copy-row input{flex:1; font-size:.78rem;}
+  .copy-row .btn{flex:0 0 auto; padding:10px 14px;}
 
   /* ---------- Ajustes: temas ---------- */
   .theme-grid{display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; margin-top:6px;}
@@ -599,7 +602,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
   </button>
   <button type="button" class="settings-row" id="rowSync">
-    <span>Sincronizar con Google Drive</span>
+    <span>Sincronizar en la nube</span>
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
   </button>
   <button type="button" class="settings-row" id="rowInstall">
@@ -620,27 +623,45 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   </div>
 </div>
 
-<!-- GOOGLE DRIVE SYNC -->
+<!-- CLOUD SYNC -->
 <div class="sheet-backdrop top" id="syncBackdrop"></div>
 <div class="sheet top" id="syncSheet">
   <div class="handle"></div>
-  <h2>Google Drive</h2>
+  <h2>Sincronización</h2>
   <div class="sync-box">
     <div class="sync-status" id="syncStatus"></div>
     <div class="tpl-row-sub" id="syncDetail"></div>
   </div>
-  <div id="syncSetup">
+
+  <div id="syncProvRow">
+    <label>Servicio</label>
+    <div class="seg" id="syncProvSeg">
+      <button type="button" data-v="dropbox">Dropbox</button>
+      <button type="button" data-v="google">Google Drive</button>
+    </div>
+  </div>
+
+  <div class="tpl-panel" id="syncSetupDropbox">
+    <label>App key de Dropbox</label>
+    <input type="text" id="syncDbxKey" placeholder="Ej. a1b2c3d4e5f6g7h" autocapitalize="off" autocomplete="off" spellcheck="false">
+    <div class="tpl-row-sub" style="margin-top:8px;">La crea gratis el administrador en dropbox.com/developers (acceso «App folder»). En «Redirect URIs» de esa app hay que añadir esta dirección exacta:</div>
+    <div class="copy-row"><input type="text" id="syncRedirect" readonly><button type="button" class="btn btn-ghost" id="btnCopyRedirect">Copiar</button></div>
+    <div class="sheet-actions" style="margin-top:10px;"><button type="button" class="btn btn-ghost" id="btnSyncSaveKey">Guardar clave</button></div>
+  </div>
+
+  <div class="tpl-panel" id="syncSetupGoogle">
     <label>ID de cliente de Google</label>
     <input type="text" id="syncClientId" placeholder="123456-abc.apps.googleusercontent.com" autocapitalize="off" autocomplete="off" spellcheck="false">
     <div class="tpl-row-sub" style="margin-top:8px;">Lo crea el administrador de la app en Google Cloud Console. Pégalo aquí y pulsa Guardar ID.</div>
     <div class="sheet-actions" style="margin-top:10px;"><button type="button" class="btn btn-ghost" id="btnSyncSaveId">Guardar ID</button></div>
   </div>
+
   <div class="sheet-actions" id="syncActions">
-    <button type="button" class="btn btn-primary" id="btnSyncConnect">Conectar con Google</button>
+    <button type="button" class="btn btn-primary" id="btnSyncConnect">Conectar</button>
     <button type="button" class="btn btn-primary" id="btnSyncNow">Sincronizar ahora</button>
     <button type="button" class="btn btn-danger" id="btnSyncOff">Desconectar</button>
   </div>
-  <p class="tpl-row-sub" style="margin-top:14px;">Tus tarjetas, plantillas y categorías se guardan en una carpeta privada de tu propio Google Drive que solo esta aplicación puede leer. Cada persona usa su cuenta y nadie más ve tus datos. Se sincroniza al abrir la app y después de cada cambio.</p>
+  <p class="tpl-row-sub" id="syncInfo" style="margin-top:14px;"></p>
   <div class="sheet-actions"><button type="button" class="btn btn-ghost" id="btnSyncClose">Cerrar</button></div>
 </div>
 
@@ -666,7 +687,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   <h2>Información</h2>
   <div class="info-body">
     <p><b>Wallet Klub</b> — monedero de tarjetas de fidelización.</p>
-    <p>Versión: <b>v-1.00.10</b><br>Última actualización: <b>02/11/2026</b><br>Desarrollador: <b>Xavibc</b></p>
+    <p>Versión: <b>v-1.00.11</b><br>Última actualización: <b>02/11/2026</b><br>Desarrollador: <b>Xavibc</b></p>
     <p>Los datos se guardan únicamente en este dispositivo (localStorage). Usa la copia de seguridad para exportarlos o pasarlos a otro dispositivo.</p>
   </div>
   <div class="sheet-actions">
@@ -2004,17 +2025,20 @@ document.getElementById('rowInstall').addEventListener('click', async ()=>{
 });
 if(isStandalone()) document.getElementById('rowInstall').style.display = 'none';
 
-/* ================= Sincronización con Google Drive ================= */
-/* El administrador puede pegar aquí su ID de cliente de Google (Google Cloud Console → Credenciales →
-   ID de cliente OAuth «Aplicación web») para que todos los usuarios tengan la sincronización ya configurada. */
+/* ================= Sincronización en la nube (Dropbox o Google Drive) ================= */
+/* El administrador puede pegar aquí las claves de su app para que todos los usuarios las tengan ya configuradas:
+   - DROPBOX_APP_KEY_DEFAULT: «App key» de la app creada gratis en dropbox.com/developers.
+   - GOOGLE_CLIENT_ID_DEFAULT: ID de cliente OAuth de Google Cloud Console (requiere cuenta de Google Cloud). */
+const DROPBOX_APP_KEY_DEFAULT = '';
 const GOOGLE_CLIENT_ID_DEFAULT = '';
 const SYNC_KEY = 'misTarjetas_sync';
+const DBX_AUTH_KEY = 'misTarjetas_dbxAuth';
 const SYNC_SCOPE = 'https://www.googleapis.com/auth/drive.appdata';
 const SYNC_FILE = 'wallet-klub.json';
 const TOMB_TTL = 60 * 24 * 3600 * 1000;
 const gid = id => document.getElementById(id);
 
-let syncMeta = {connected:false, email:'', lastSync:0, clientId:'', tomb:{cards:{}, templates:{}, categories:{}}};
+let syncMeta = {connected:false, provider:'', email:'', lastSync:0, clientId:'', dbxKey:'', dbxRefresh:'', tomb:{cards:{}, templates:{}, categories:{}}};
 let syncState = 'idle', syncMsg = '';
 let syncing = false, syncAgain = false, applyingRemote = false, syncTimer = null;
 let accessToken = null, tokenExp = 0, tokenClient = null, tokenClientFor = '', pendingToken = null, gisPromise = null;
@@ -2029,7 +2053,15 @@ function loadSyncMeta(){
 }
 function saveSyncMeta(){ try{ localStorage.setItem(SYNC_KEY, JSON.stringify(syncMeta)); }catch(e){} }
 function markDeleted(kind, id){ syncMeta.tomb[kind][id] = Date.now(); saveSyncMeta(); }
-function getClientId(){ return GOOGLE_CLIENT_ID_DEFAULT || syncMeta.clientId || ''; }
+function googleClientId(){ return GOOGLE_CLIENT_ID_DEFAULT || syncMeta.clientId || ''; }
+function dropboxKey(){ return DROPBOX_APP_KEY_DEFAULT || syncMeta.dbxKey || ''; }
+function curProvider(){
+  if(syncMeta.provider === 'google' || syncMeta.provider === 'dropbox') return syncMeta.provider;
+  if(!dropboxKey() && googleClientId()) return 'google';
+  return 'dropbox';
+}
+function getClientId(){ return curProvider() === 'google' ? googleClientId() : dropboxKey(); }
+function providerLabel(){ return curProvider() === 'google' ? 'Google Drive' : 'Dropbox'; }
 function fmtDate(ts){
   try{ return new Date(ts).toLocaleString('es-ES', {dateStyle:'short', timeStyle:'short'}); }catch(e){ return new Date(ts).toISOString(); }
 }
@@ -2118,7 +2150,25 @@ function refreshAfterSync(){
   if(catSheet.classList.contains('open')) renderCatManager();
 }
 
-/* ---- Inicio de sesión de Google (Google Identity Services) ---- */
+function authError(msg){ const er = new Error(msg); er.code = 'auth'; return er; }
+function explainError(err){
+  const m = String((err && err.message) || err || '');
+  if(m === 'popup_closed') return 'Cerraste la ventana de Google antes de terminar.';
+  if(m === 'popup_failed_to_open') return 'El navegador bloqueó la ventana de Google. Permite las ventanas emergentes e inténtalo de nuevo.';
+  if(m === 'access_denied') return 'No se concedió el permiso.';
+  if(m === 'timeout') return 'Google tardó demasiado en responder.';
+  if(m === 'invalid_grant') return 'Dropbox ya no reconoce tu sesión. Vuelve a conectar.';
+  if(err && err.scope) return 'La app de Dropbox no tiene todos los permisos: hay que activar account_info.read, files.content.read y files.content.write en su pestaña Permissions.';
+  if(err && err.code === 'offline') return 'Sin conexión a internet.';
+  if(err && err.status === 429) return 'El servicio pide esperar un momento. Se reintentará solo.';
+  if(err && err.status === 403 && curProvider() === 'google') return 'Google denegó el acceso. Comprueba que la API de Google Drive esté activada en el proyecto.';
+  if(err && err.status && err.detail) return providerLabel() + ': ' + err.detail;
+  if(err && err.status) return providerLabel() + ' respondió con el error ' + err.status + '.';
+  if(err && err.code === 'auth') return 'Hace falta volver a confirmar tu cuenta.';
+  return m || 'Error desconocido';
+}
+
+/* ---- Google: inicio de sesión (Google Identity Services) y API de Drive ---- */
 function loadGis(){
   if(window.google && window.google.accounts && window.google.accounts.oauth2) return Promise.resolve();
   if(gisPromise) return gisPromise;
@@ -2132,9 +2182,8 @@ function loadGis(){
   });
   return gisPromise;
 }
-function authError(msg){ const er = new Error(msg); er.code = 'auth'; return er; }
 function requestToken(prompt, hint){
-  const cid = getClientId();
+  const cid = googleClientId();
   return loadGis().then(()=>new Promise((resolve, reject)=>{
     if(!tokenClient || tokenClientFor !== cid){
       tokenClient = google.accounts.oauth2.initTokenClient({
@@ -2171,24 +2220,6 @@ function requestToken(prompt, hint){
     tokenClient.requestAccessToken(cfg);
   }));
 }
-async function getToken(interactive){
-  if(accessToken && Date.now() < tokenExp) return accessToken;
-  return requestToken(interactive ? '' : 'none', syncMeta.email || undefined);
-}
-function explainError(err){
-  const m = String((err && err.message) || err || '');
-  if(m === 'popup_closed') return 'Cerraste la ventana de Google antes de terminar.';
-  if(m === 'popup_failed_to_open') return 'El navegador bloqueó la ventana de Google. Permite las ventanas emergentes e inténtalo de nuevo.';
-  if(m === 'access_denied') return 'No se concedió el permiso de Google Drive.';
-  if(m === 'timeout') return 'Google tardó demasiado en responder.';
-  if(err && err.code === 'offline') return 'Sin conexión a internet.';
-  if(err && err.status === 403) return 'Google denegó el acceso. Comprueba que la API de Google Drive esté activada en el proyecto.';
-  if(err && err.status) return 'Google Drive respondió con el error ' + err.status + '.';
-  if(err && err.code === 'auth') return 'Hace falta volver a confirmar tu cuenta de Google.';
-  return m || 'Error desconocido';
-}
-
-/* ---- API de Google Drive (carpeta privada de la app: appDataFolder) ---- */
 async function driveFetch(token, url, opts){
   opts = opts || {};
   opts.headers = Object.assign({}, opts.headers, {Authorization: 'Bearer ' + token});
@@ -2227,17 +2258,174 @@ async function fetchDriveUser(token){
   const r = await driveFetch(token, 'https://www.googleapis.com/drive/v3/about?fields=user(displayName,emailAddress)');
   return (await r.json()).user || {};
 }
+function googleRemote(token){
+  return {
+    async read(){
+      const file = await driveFind(token);
+      if(!file) return {data:null, ctx:null};
+      return {data: await driveDownload(token, file.id), ctx: file.id};
+    },
+    async write(json, ctx){ if(ctx) await driveUpdate(token, ctx, json); else await driveCreate(token, json); }
+  };
+}
+
+/* ---- Dropbox: OAuth con PKCE (sin servidor ni clave secreta) y API de archivos ---- */
+function dbxRedirectUri(){ return location.origin + location.pathname; }
+function b64url(bytes){
+  let s = '';
+  bytes.forEach(b=>{ s += String.fromCharCode(b); });
+  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function randomB64(n){ const a = new Uint8Array(n); crypto.getRandomValues(a); return b64url(a); }
+async function pkceChallenge(verifier){
+  const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
+  return b64url(new Uint8Array(d));
+}
+function startDropboxAuth(url){ location.href = url; }
+async function connectDropbox(){
+  const key = dropboxKey();
+  if(!key){ showToast('Falta la clave (App key) de Dropbox'); return; }
+  if(!navigator.onLine){ showToast('Necesitas conexión a internet'); return; }
+  if(!(window.crypto && crypto.subtle)){ showToast('Dropbox necesita abrir la app desde una dirección https'); return; }
+  const verifier = randomB64(48);
+  const state = 'wk-dbx-' + randomB64(12);
+  const challenge = await pkceChallenge(verifier);
+  try{ localStorage.setItem(DBX_AUTH_KEY, JSON.stringify({verifier, state, redirect: dbxRedirectUri(), ts: Date.now()})); }catch(e){}
+  const q = new URLSearchParams({
+    client_id: key, response_type: 'code', code_challenge: challenge, code_challenge_method: 'S256',
+    token_access_type: 'offline', redirect_uri: dbxRedirectUri(), state: state
+  });
+  startDropboxAuth('https://www.dropbox.com/oauth2/authorize?' + q.toString());
+}
+async function dbxTokenRequest(params){
+  let res;
+  try{
+    res = await fetch('https://api.dropboxapi.com/oauth2/token', {
+      method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: new URLSearchParams(params).toString()
+    });
+  }catch(e){ const er = new Error('red'); er.code = 'offline'; throw er; }
+  let j = {};
+  try{ j = await res.json(); }catch(e){}
+  if(!res.ok){
+    const er = new Error((j && j.error) || 'http');
+    er.code = (res.status === 400 || res.status === 401) ? 'auth' : 'http';
+    er.status = res.status; er.detail = j && j.error_description;
+    throw er;
+  }
+  return j;
+}
+async function dbxRefresh(){
+  if(!syncMeta.dbxRefresh) throw authError('sin_token');
+  const j = await dbxTokenRequest({grant_type: 'refresh_token', refresh_token: syncMeta.dbxRefresh, client_id: dropboxKey()});
+  accessToken = j.access_token;
+  tokenExp = Date.now() + ((parseInt(j.expires_in, 10) || 14400) - 120) * 1000;
+  return accessToken;
+}
+async function dbxFetch(token, url, opts){
+  opts = opts || {};
+  opts.method = 'POST';
+  opts.headers = Object.assign({Authorization: 'Bearer ' + token}, opts.headers || {});
+  let res;
+  try{ res = await fetch(url, opts); }
+  catch(e){ const er = new Error('red'); er.code = 'offline'; throw er; }
+  if(res.ok) return res;
+  const text = await res.text().catch(()=>'');
+  if(res.status === 401){
+    if(/missing_scope/.test(text)){ const er = new Error('scope'); er.code = 'http'; er.status = 401; er.scope = true; throw er; }
+    accessToken = null; tokenExp = 0;
+    const er = authError('401'); er.fromDrive = true; throw er;
+  }
+  const er = new Error('http'); er.code = 'http'; er.status = res.status;
+  if(res.status === 409){
+    if(/not_found/.test(text)) er.notFound = true;
+    if(/conflict/.test(text)) er.code = 'conflict';
+  }
+  throw er;
+}
+async function dbxAccountEmail(token){
+  const r = await dbxFetch(token, 'https://api.dropboxapi.com/2/users/get_current_account');
+  return (await r.json()).email || '';
+}
+function dropboxRemote(token){
+  const path = '/' + SYNC_FILE;
+  return {
+    async read(){
+      try{
+        const res = await dbxFetch(token, 'https://content.dropboxapi.com/2/files/download', {
+          headers: {'Dropbox-API-Arg': JSON.stringify({path}), 'Content-Type': 'application/octet-stream'}
+        });
+        let rev = null;
+        try{ const meta = JSON.parse(res.headers.get('dropbox-api-result') || 'null'); rev = (meta && meta.rev) || null; }catch(e){}
+        return {data: await res.json(), ctx: {exists: true, rev}};
+      }catch(err){
+        if(err.notFound) return {data: null, ctx: {exists: false, rev: null}};
+        throw err;
+      }
+    },
+    async write(json, ctx){
+      const mode = ctx && ctx.exists ? (ctx.rev ? {'.tag': 'update', update: ctx.rev} : 'overwrite') : 'add';
+      await dbxFetch(token, 'https://content.dropboxapi.com/2/files/upload', {
+        headers: {'Dropbox-API-Arg': JSON.stringify({path, mode, autorename: false, mute: true}), 'Content-Type': 'application/octet-stream'},
+        body: json
+      });
+    }
+  };
+}
+// Al volver de Dropbox, la app se abre con ?code=...&state=... en la dirección
+async function handleDropboxRedirect(){
+  const q = new URLSearchParams(location.search);
+  const state = q.get('state') || '';
+  if(!/^wk-dbx-/.test(state)) return false;
+  let saved = null;
+  try{ saved = JSON.parse(localStorage.getItem(DBX_AUTH_KEY) || 'null'); }catch(e){}
+  const code = q.get('code'), err = q.get('error');
+  try{ history.replaceState(null, '', location.pathname + location.hash); }catch(e){}
+  try{ localStorage.removeItem(DBX_AUTH_KEY); }catch(e){}
+  if(err){ showToast('Dropbox: ' + (q.get('error_description') || err)); return true; }
+  if(!saved || saved.state !== state || !code){ showToast('La respuesta de Dropbox no es válida. Inténtalo de nuevo.'); return true; }
+  try{
+    const j = await dbxTokenRequest({grant_type: 'authorization_code', code, code_verifier: saved.verifier, client_id: dropboxKey(), redirect_uri: saved.redirect});
+    accessToken = j.access_token;
+    tokenExp = Date.now() + ((parseInt(j.expires_in, 10) || 14400) - 120) * 1000;
+    syncMeta.provider = 'dropbox';
+    syncMeta.dbxRefresh = j.refresh_token || syncMeta.dbxRefresh || '';
+    syncMeta.connected = true;
+    try{ syncMeta.email = await dbxAccountEmail(accessToken); }catch(e){}
+    saveSyncMeta();
+    showToast('Conectado a Dropbox');
+    await syncNow({interactive: true});
+  }catch(e){
+    showToast(explainError(e));
+    setSyncState(syncMeta.connected ? 'error' : 'idle', explainError(e));
+  }
+  return true;
+}
 
 /* ---- Sincronizar ---- */
+async function getToken(interactive){
+  if(accessToken && Date.now() < tokenExp) return accessToken;
+  if(curProvider() === 'dropbox') return dbxRefresh();
+  return requestToken(interactive ? '' : 'none', syncMeta.email || undefined);
+}
 async function doSync(token){
-  const file = await driveFind(token);
-  if(!file){ await driveCreate(token, JSON.stringify(buildSnapshot())); return; }
-  const remote = await driveDownload(token, file.id);
-  const beforeCanon = canon(buildSnapshot());
-  const merged = mergeAll(remote || {});
-  const afterCanon = canon({tarjetas:merged.cards, plantillas:merged.templates, categorias:merged.categories, borrados:merged.tomb});
-  if(afterCanon !== beforeCanon) applyMerged(merged);
-  if(afterCanon !== canon(remote || {})) await driveUpdate(token, file.id, JSON.stringify(buildSnapshot()));
+  const ad = curProvider() === 'google' ? googleRemote(token) : dropboxRemote(token);
+  for(let attempt = 0; attempt < 3; attempt++){
+    const {data, ctx} = await ad.read();
+    if(!data){
+      try{ await ad.write(JSON.stringify(buildSnapshot()), ctx); return; }
+      catch(err){ if(err.code === 'conflict') continue; throw err; }
+    }
+    const beforeCanon = canon(buildSnapshot());
+    const merged = mergeAll(data);
+    const afterCanon = canon({tarjetas:merged.cards, plantillas:merged.templates, categorias:merged.categories, borrados:merged.tomb});
+    if(afterCanon !== beforeCanon) applyMerged(merged);
+    if(afterCanon !== canon(data)){
+      try{ await ad.write(JSON.stringify(buildSnapshot()), ctx); }
+      catch(err){ if(err.code === 'conflict') continue; throw err; }
+    }
+    return;
+  }
+  const er = new Error('conflicto'); er.code = 'http'; er.status = 409; throw er;
 }
 function setSyncState(s, msg){ syncState = s; syncMsg = msg || ''; renderSyncUi(); }
 async function syncNow(opts){
@@ -2258,7 +2446,11 @@ async function syncNow(opts){
     setSyncState('ok');
   }catch(err){
     if(err && err.code === 'offline') setSyncState('offline');
-    else if(err && err.code === 'auth') setSyncState('needs-auth', explainError(err));
+    else if(err && err.code === 'auth'){
+      setSyncState('needs-auth', explainError(err));
+      // Dropbox: si ya no vale la sesión, al tocar el aviso se abre Dropbox para volver a dar permiso
+      if(opts.interactive && curProvider() === 'dropbox') connectDropbox();
+    }
     else setSyncState('error', explainError(err));
     if(opts.interactive) showToast(explainError(err));
   }finally{
@@ -2273,8 +2465,9 @@ function scheduleSync(ms){
   syncTimer = setTimeout(()=>syncNow({interactive:false}), ms || 4000);
 }
 async function connectGoogle(){
-  if(!getClientId()){ showToast('Falta el ID de cliente de Google'); return; }
+  if(!googleClientId()){ showToast('Falta el ID de cliente de Google'); return; }
   if(!navigator.onLine){ showToast('Necesitas conexión a internet'); return; }
+  syncMeta.provider = 'google'; saveSyncMeta();
   gid('btnSyncConnect').disabled = true;
   try{
     const token = await requestToken('select_account');
@@ -2290,44 +2483,67 @@ async function connectGoogle(){
     renderSyncUi();
   }
 }
-function disconnectGoogle(){
-  const t = accessToken;
+function connectSync(){ return curProvider() === 'dropbox' ? connectDropbox() : connectGoogle(); }
+async function disconnectSync(){
+  const prov = curProvider();
+  let t = accessToken;
+  if(prov === 'dropbox' && !t && syncMeta.dbxRefresh){ try{ t = await dbxRefresh(); }catch(e){} }
   accessToken = null; tokenExp = 0;
-  try{ if(t && window.google && google.accounts && google.accounts.oauth2) google.accounts.oauth2.revoke(t, ()=>{}); }catch(e){}
+  try{
+    if(prov === 'google' && t && window.google && google.accounts && google.accounts.oauth2) google.accounts.oauth2.revoke(t, ()=>{});
+    if(prov === 'dropbox' && t) fetch('https://api.dropboxapi.com/2/auth/token/revoke', {method: 'POST', headers: {Authorization: 'Bearer ' + t}}).catch(()=>{});
+  }catch(e){}
   clearTimeout(syncTimer);
-  syncMeta.connected = false; syncMeta.email = ''; syncMeta.lastSync = 0;
+  const label = providerLabel();
+  syncMeta.connected = false; syncMeta.email = ''; syncMeta.lastSync = 0; syncMeta.dbxRefresh = '';
   saveSyncMeta();
   setSyncState('idle');
-  showToast('Desconectado de Google Drive');
+  showToast('Desconectado de ' + label);
 }
 
 /* ---- Interfaz ---- */
 function renderSyncUi(){
+  const prov = curProvider(), label = providerLabel();
   const cid = getClientId();
   const on = !!syncMeta.connected;
   let status, detail = '';
-  if(!cid){ status = 'Sin configurar'; detail = 'Falta el ID de cliente de Google para activar la sincronización.'; }
-  else if(!on){ status = 'Sin conectar'; detail = 'Conecta tu cuenta de Google para guardar tus tarjetas en tu Drive.'; }
+  if(!cid){ status = 'Sin configurar'; detail = prov === 'dropbox' ? 'Falta la clave (App key) de Dropbox para activar la sincronización.' : 'Falta el ID de cliente de Google para activar la sincronización.'; }
+  else if(!on){ status = 'Sin conectar'; detail = 'Conecta tu cuenta de ' + label + ' para guardar tus tarjetas en tu propia nube.'; }
   else {
     status = {syncing:'Sincronizando…', ok:'Sincronizado', 'needs-auth':'Sincronización pausada', offline:'Sin conexión', error:'Error de sincronización'}[syncState] || 'Conectado';
-    const parts = [];
-    if(syncMeta.email) parts.push('Cuenta: ' + syncMeta.email);
+    const parts = [label + (syncMeta.email ? ' · ' + syncMeta.email : '')];
     if(syncMeta.lastSync) parts.push('Última sincronización: ' + fmtDate(syncMeta.lastSync));
     if(syncState === 'needs-auth') parts.push('Pulsa «Sincronizar ahora» para reanudar.');
     if(syncState === 'offline') parts.push('Se sincronizará al recuperar la conexión.');
-    if(syncState === 'error' && syncMsg) parts.push(syncMsg);
+    if((syncState === 'error' || syncState === 'needs-auth') && syncMsg) parts.push(syncMsg);
     detail = parts.join('\n');
   }
   gid('syncStatus').textContent = status;
   const dt = gid('syncDetail');
   dt.textContent = detail;
   dt.style.whiteSpace = 'pre-line';
-  gid('syncSetup').style.display = GOOGLE_CLIENT_ID_DEFAULT ? 'none' : '';
-  if(!GOOGLE_CLIENT_ID_DEFAULT && document.activeElement !== gid('syncClientId')) gid('syncClientId').value = syncMeta.clientId || '';
+
+  const anyDefault = !!(DROPBOX_APP_KEY_DEFAULT || GOOGLE_CLIENT_ID_DEFAULT);
+  const showDbx = !anyDefault || !!DROPBOX_APP_KEY_DEFAULT;
+  const showGoogle = !anyDefault || !!GOOGLE_CLIENT_ID_DEFAULT;
+  const segBtns = [...document.querySelectorAll('#syncProvSeg button')];
+  segBtns.forEach(b=>{ b.style.display = (b.dataset.v === 'dropbox' ? showDbx : showGoogle) ? '' : 'none'; });
+  setSeg('syncProvSeg', prov);
+  gid('syncProvRow').style.display = (!on && showDbx && showGoogle) ? '' : 'none';
+  gid('syncSetupDropbox').style.display = (prov === 'dropbox' && !DROPBOX_APP_KEY_DEFAULT && !on) ? '' : 'none';
+  gid('syncSetupGoogle').style.display = (prov === 'google' && !GOOGLE_CLIENT_ID_DEFAULT && !on) ? '' : 'none';
+  gid('syncRedirect').value = dbxRedirectUri();
+  if(document.activeElement !== gid('syncDbxKey')) gid('syncDbxKey').value = syncMeta.dbxKey || '';
+  if(document.activeElement !== gid('syncClientId')) gid('syncClientId').value = syncMeta.clientId || '';
+
+  gid('btnSyncConnect').textContent = 'Conectar con ' + label;
   gid('btnSyncConnect').style.display = (!on && cid) ? '' : 'none';
   gid('btnSyncNow').style.display = on ? '' : 'none';
   gid('btnSyncOff').style.display = on ? '' : 'none';
   gid('btnSyncNow').disabled = syncState === 'syncing';
+  gid('syncInfo').textContent = prov === 'dropbox'
+    ? 'Tus tarjetas, plantillas y categorías se guardan en una carpeta privada de tu propio Dropbox (dentro de «Aplicaciones») a la que solo accede esta aplicación. Cada persona usa su cuenta y nadie más ve tus datos. Se sincroniza al abrir la app y después de cada cambio.'
+    : 'Tus tarjetas, plantillas y categorías se guardan en una carpeta privada de tu propio Google Drive que solo esta aplicación puede leer. Cada persona usa su cuenta y nadie más ve tus datos. Se sincroniza al abrir la app y después de cada cambio.';
   const attention = on && (syncState === 'needs-auth' || syncState === 'error');
   const banner = gid('syncBanner');
   banner.hidden = !attention;
@@ -2341,12 +2557,13 @@ function closeSync(){ syncBackdrop.classList.remove('open'); syncSheet.classList
 gid('rowSync').addEventListener('click', ()=>{ closeSettings(); openSync(); });
 gid('btnSyncClose').addEventListener('click', closeSync);
 syncBackdrop.addEventListener('click', closeSync);
-gid('btnSyncConnect').addEventListener('click', connectGoogle);
+gid('btnSyncConnect').addEventListener('click', connectSync);
 gid('btnSyncNow').addEventListener('click', ()=>syncNow({interactive:true}));
 gid('syncBanner').addEventListener('click', ()=>syncNow({interactive:true}));
 gid('btnSyncOff').addEventListener('click', ()=>{
-  if(confirm('¿Desconectar de Google Drive? Tus tarjetas seguirán en este dispositivo y la copia seguirá en tu Drive.')) disconnectGoogle();
+  if(confirm('¿Desconectar de ' + providerLabel() + '? Tus tarjetas seguirán en este dispositivo y la copia seguirá en tu nube.')) disconnectSync();
 });
+bindSeg('syncProvSeg', v=>{ syncMeta.provider = v; saveSyncMeta(); renderSyncUi(); });
 gid('btnSyncSaveId').addEventListener('click', ()=>{
   const v = gid('syncClientId').value.trim();
   if(v && !/\.apps\.googleusercontent\.com$/.test(v)){ showToast('Ese ID no parece válido'); return; }
@@ -2356,11 +2573,25 @@ gid('btnSyncSaveId').addEventListener('click', ()=>{
   renderSyncUi();
   showToast(v ? 'ID guardado' : 'ID borrado');
 });
+gid('btnSyncSaveKey').addEventListener('click', ()=>{
+  const v = gid('syncDbxKey').value.trim();
+  if(v && !/^[A-Za-z0-9]{8,40}$/.test(v)){ showToast('Esa clave no parece válida'); return; }
+  syncMeta.dbxKey = v;
+  saveSyncMeta();
+  renderSyncUi();
+  showToast(v ? 'Clave guardada' : 'Clave borrada');
+});
+gid('btnCopyRedirect').addEventListener('click', async ()=>{
+  const v = gid('syncRedirect').value;
+  try{ await navigator.clipboard.writeText(v); showToast('Dirección copiada'); }
+  catch(e){ gid('syncRedirect').select(); showToast('Selecciona y copia la dirección'); }
+});
 window.addEventListener('online', ()=>scheduleSync(800));
 document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState === 'visible' && syncMeta.connected && Date.now() - syncMeta.lastSync > 60000) scheduleSync(500);
 });
-function initSync(){
+async function initSync(){
+  await handleDropboxRedirect();
   renderSyncUi();
   if(syncMeta.connected && getClientId()) scheduleSync(1200);
 }

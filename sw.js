@@ -19,7 +19,8 @@ self.addEventListener('activate', e=>{
 // Red primero (así las actualizaciones llegan siempre) y caché como respaldo sin conexión
 self.addEventListener('fetch', e=>{
   const req = e.request;
-  if(req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
+  const u = new URL(req.url);
+  if(req.method !== 'GET' || u.origin !== location.origin || u.searchParams.has('code')) return;
   e.respondWith(
     fetch(req).then(res=>{
       const copy = res.clone();
