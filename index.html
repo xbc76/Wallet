@@ -590,6 +590,20 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
     :root{--zoom:1.6;}
   }
 
+  /* Cada cara se oculta cuando no toca verla (evita que la delantera se transparente al girar) */
+  .flip-face{transition:visibility 0s linear .3s;}
+  .flip-back{visibility:hidden;}
+  .flip.flipped .flip-front{visibility:hidden;}
+  .flip.flipped .flip-back{visibility:visible;}
+  .flip:not(.flipped) .flip-front{visibility:visible;}
+  .flip:not(.flipped) .flip-back{visibility:hidden;}
+  @media (prefers-reduced-motion: reduce){ .flip-face{transition-delay:0s;} }
+
+  /* Barras de desplazamiento y controles del navegador acordes al tema */
+  :root{color-scheme:dark;}
+  [data-theme="claro"], [data-theme="crema"], [data-theme="flor-de-loto"], [data-theme="infantil"]{color-scheme:light;}
+  *{scrollbar-width:thin; scrollbar-color:color-mix(in srgb, var(--ink) 30%, transparent) transparent;}
+
 </style>
 </head>
 <body>
@@ -781,7 +795,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
   <h2>Información</h2>
   <div class="info-body">
     <p><b>Wallet Klub</b> — monedero de tarjetas de fidelización.</p>
-    <p>Versión: <b>v-1.00.13</b><br>Última actualización: <b>02/11/2026</b><br>Desarrollador: <b>Xavibc</b></p>
+    <p>Versión: <b>v-1.00.14</b><br>Última actualización: <b>02/11/2026</b><br>Desarrollador: <b>Xavibc</b></p>
     <p>Los datos se guardan únicamente en este dispositivo (localStorage). Usa la copia de seguridad para exportarlos o pasarlos a otro dispositivo.</p>
   </div>
   <div class="sheet-actions">
